@@ -1,5 +1,6 @@
 package bo.Custom;
 
+import bo.SuperBO;
 import dao.Custom.CustomerDAO;
 import dao.Custom.Impl.CustomerDAOImpl;
 import dao.Custom.Impl.ItemDAOImpl;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface PurchaseOrderBo {
+public interface PurchaseOrderBo extends SuperBO {
         public CustomerDTO searchCustomer(String id) throws SQLException, ClassNotFoundException ;
 
         public ItemDTO searchItem(String code) throws SQLException, ClassNotFoundException ;
