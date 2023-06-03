@@ -1,30 +1,32 @@
 package bo;
 
-import bo.Custom.Impl.CustomerBOImpl;
-import bo.Custom.Impl.ItemBOImpl;
-import bo.Custom.Impl.PurchaseOrderBOImpl;
+import bo.custom.impl.CustomerBOImpl;
+import bo.custom.impl.ItemBOImpl;
+import bo.custom.impl.PurchaseOrderBOImpl;
 
 public class BOFactory {
     private static BOFactory boFactory;
     private BOFactory(){
-
     }
     public static BOFactory getBoFactory(){
-        return (boFactory == null) ? boFactory = new BOFactory():boFactory;
+        return (boFactory==null)? boFactory=new BOFactory() : boFactory;
     }
+
     public enum BOTypes{
-        CUSTOMER,ITEM,PURCHASE_ORDER
+        CUSTOMER,ITEM,PURCHASEO
     }
+
     public SuperBO getBO(BOTypes types){
         switch (types){
             case CUSTOMER:
                 return new CustomerBOImpl();
             case ITEM:
                 return new ItemBOImpl();
-            case PURCHASE_ORDER:
+            case PURCHASEO:
                 return new PurchaseOrderBOImpl();
             default:
                 return null;
         }
     }
+
 }

@@ -1,12 +1,9 @@
 package controller;
 
 import bo.BOFactory;
-import bo.Custom.CustomerBO;
-import bo.Custom.Impl.CustomerBOImpl;
+import bo.custom.CustomerBO;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
-import dao.Custom.CustomerDAO;
-import dao.Custom.Impl.CustomerDAOImpl;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -44,6 +41,7 @@ public class ManageCustomersFormController {
     public TableView<CustomerTM> tblCustomers;
     public JFXButton btnAddNewCustomer;
 
+//    CustomerBO customerBO = new CustomerBOImpl();
     CustomerBO customerBO  = (CustomerBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.CUSTOMER);
 
     public void initialize() {
@@ -71,15 +69,13 @@ public class ManageCustomersFormController {
 
         txtCustomerAddress.setOnAction(event -> btnSave.fire());
         loadAllCustomers();
-    }//
+    }
 
     private void loadAllCustomers() {
         tblCustomers.getItems().clear();
         try {
             /*Get all customers*/
-            CustomerBOImpl customerBO=new CustomerBOImpl();
-            ArrayList<CustomerDTO> allCustomers = customerBO.getAllCustomer();
-
+            ArrayList<CustomerDTO> allCustomers = customerBO.getAllCustomers();
 
             for (CustomerDTO c : allCustomers) {
                 tblCustomers.getItems().add(new CustomerTM(c.getId(), c.getName(), c.getAddress()));
@@ -128,6 +124,7 @@ public class ManageCustomersFormController {
         tblCustomers.getSelectionModel().clearSelection();
     }
 
+
     public void btnSave_OnAction(ActionEvent actionEvent) {
         String id = txtCustomerId.getText();
         String name = txtCustomerName.getText();
@@ -151,9 +148,7 @@ public class ManageCustomersFormController {
                 }
 
                 //Add Customer
-                CustomerBOImpl customerBO=new CustomerBOImpl();
                 customerBO.addCustomer(new CustomerDTO(id,name,address));
-
 
                 tblCustomers.getItems().add(new CustomerTM(id, name, address));
             } catch (SQLException e) {
@@ -171,7 +166,6 @@ public class ManageCustomersFormController {
                 }
 
                 //Update Customer
-                CustomerBOImpl customerBO=new CustomerBOImpl();
                 customerBO.updateCustomer(new CustomerDTO(id,name,address));
 
             } catch (SQLException e) {
@@ -191,7 +185,6 @@ public class ManageCustomersFormController {
 
 
     boolean existCustomer(String id) throws SQLException, ClassNotFoundException {
-        CustomerBOImpl customerBO=new CustomerBOImpl();
         return customerBO.existCustomer(id);
     }
 
@@ -205,7 +198,6 @@ public class ManageCustomersFormController {
             }
 
             //Delete Customer
-            CustomerBOImpl customerBO=new CustomerBOImpl();
             customerBO.deleteCustomer(id);
 
             tblCustomers.getItems().remove(tblCustomers.getSelectionModel().getSelectedItem());
@@ -222,9 +214,7 @@ public class ManageCustomersFormController {
     private String generateNewId() {
         try {
             //Generate New ID
-            CustomerBOImpl customerBO=new CustomerBOImpl();
             return customerBO.generateNewCustomerID();
-
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to generate a new id " + e.getMessage()).show();
         } catch (ClassNotFoundException e) {
@@ -239,6 +229,7 @@ public class ManageCustomersFormController {
             int newCustomerId = Integer.parseInt(id.replace("C", "")) + 1;
             return String.format("C00-%03d", newCustomerId);
         }
+
     }
 
     private String getLastCustomerId() {
@@ -246,4 +237,5 @@ public class ManageCustomersFormController {
         Collections.sort(tempCustomersList);
         return tempCustomersList.get(tempCustomersList.size() - 1).getId();
     }
+
 }

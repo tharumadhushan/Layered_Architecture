@@ -1,19 +1,10 @@
 package controller;
 
 import bo.BOFactory;
-import bo.Custom.Impl.PurchaseOrderBOImpl;
-import bo.Custom.PurchaseOrderBo;
+import bo.custom.PurchaseOrderBO;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
-import dao.Custom.CustomerDAO;
-import dao.Custom.Impl.CustomerDAOImpl;
-import dao.Custom.Impl.ItemDAOImpl;
-import dao.Custom.Impl.OrderDAOImpl;
-import dao.Custom.Impl.OrderDetailsDAOImpl;
-import dao.Custom.ItemDAO;
-import dao.Custom.OrderDAO;
-import dao.Custom.OrderDetailDAO;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.event.ActionEvent;
@@ -28,6 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import model.CustomerDTO;
 import model.ItemDTO;
+import model.OrderDTO;
 import model.OrderDetailDTO;
 import view.tdm.OrderDetailTM;
 
@@ -64,7 +56,8 @@ public class PlaceOrderFormController {
     public Label lblTotal;
     private String orderId;
 
-    PurchaseOrderBo purchaseOrderBo = (PurchaseOrderBo) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.PURCHASE_ORDER);
+    PurchaseOrderBO purchaseOrderBO  = (PurchaseOrderBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.PURCHASEO);
+
 
     public void initialize() throws SQLException, ClassNotFoundException {
 
@@ -114,7 +107,7 @@ public class PlaceOrderFormController {
                             new Alert(Alert.AlertType.ERROR, "There is no such customer associated with the id " + newValue + "").show();
                         }
                         //Search Customer
-                        PurchaseOrderBOImpl purchaseOrderBO=new PurchaseOrderBOImpl();
+
                         CustomerDTO customerDTO = purchaseOrderBO.searchCustomer(newValue + "");
                         txtCustomerName.setText(customerDTO.getName());
 
@@ -143,8 +136,7 @@ public class PlaceOrderFormController {
                     }
 
                     //Search Item
-                    PurchaseOrderBOImpl purchaseOrderBO = new PurchaseOrderBOImpl();
-                    ItemDTO item = purchaseOrderBO.findItem(newItemCode + "");
+                    ItemDTO item = purchaseOrderBO.searchItem(newItemCode + "");
 
                     txtDescription.setText(item.getDescription());
                     txtUnitPrice.setText(item.getUnitPrice().setScale(2).toString());
@@ -189,18 +181,15 @@ public class PlaceOrderFormController {
     }
 
     private boolean existItem(String code) throws SQLException, ClassNotFoundException {
-        PurchaseOrderBOImpl purchaseOrderBO=new PurchaseOrderBOImpl();
         return purchaseOrderBO.existItem(code);
     }
 
     boolean existCustomer(String id) throws SQLException, ClassNotFoundException {
-        PurchaseOrderBOImpl purchaseOrderBO=new PurchaseOrderBOImpl();
         return purchaseOrderBO.existCustomer(id);
     }
 
     public String generateNewOrderId() {
         try {
-            PurchaseOrderBOImpl purchaseOrderBO=new PurchaseOrderBOImpl();
             return purchaseOrderBO.generateOrderID();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to generate a new order id").show();
@@ -212,7 +201,6 @@ public class PlaceOrderFormController {
 
     private void loadAllCustomerIds() {
         try {
-            PurchaseOrderBOImpl purchaseOrderBO=new PurchaseOrderBOImpl();
             ArrayList<CustomerDTO> allCustomers = purchaseOrderBO.getAllCustomers();
             for (CustomerDTO c : allCustomers) {
                 cmbCustomerId.getItems().add(c.getId());
@@ -227,11 +215,11 @@ public class PlaceOrderFormController {
     private void loadAllItemCodes() {
         try {
             /*Get all items*/
-            PurchaseOrderBOImpl purchaseOrderBO=new PurchaseOrderBOImpl();
             ArrayList<ItemDTO> allItems = purchaseOrderBO.getAllItems();
             for (ItemDTO i : allItems) {
                 cmbItemCode.getItems().add(i.getCode());
             }
+
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
         } catch (ClassNotFoundException e) {
@@ -305,9 +293,9 @@ public class PlaceOrderFormController {
     public void txtQty_OnAction(ActionEvent actionEvent) {
     }
 
-    public void btnPlaceOrder_OnAction(ActionEvent actionEvent) {
+    public void btnPlaceOrder_OnAction(ActionEvent actionEvent) throws SQLException, ClassNotFoundException {
         boolean b = saveOrder(orderId, LocalDate.now(), cmbCustomerId.getValue(),
-                tblOrderDetails.getItems().stream().map(tm -> new OrderDetailDTO(orderId,tm.getCode(), tm.getQty(), tm.getUnitPrice())).collect(Collectors.toList()));
+                tblOrderDetails.getItems().stream().map(tm -> new OrderDetailDTO(orderId, tm.getCode(), tm.getQty(), tm.getUnitPrice())).collect(Collectors.toList()));
 
         if (b) {
             new Alert(Alert.AlertType.INFORMATION, "Order has been placed successfully").show();
@@ -324,8 +312,10 @@ public class PlaceOrderFormController {
         calculateTotal();
     }
 
-    public boolean saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) {
-        PurchaseOrderBo purchaseOrderBo=new PurchaseOrderBOImpl();
-        return purchaseOrderBo.purchaseOrder(orderId,orderDate,customerId,orderDetails);
-    }
+        public boolean saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) throws SQLException, ClassNotFoundException {
+            OrderDTO orderDTO = new OrderDTO(orderId, orderDate, customerId, orderDetails);
+            return purchaseOrderBO.purchaseOrder(orderDTO);
+        }
+
+
 }

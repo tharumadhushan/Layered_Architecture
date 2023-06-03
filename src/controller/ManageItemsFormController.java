@@ -1,12 +1,9 @@
 package controller;
 
 import bo.BOFactory;
-import bo.Custom.Impl.ItemBOImpl;
-import bo.Custom.ItemBO;
+import bo.custom.ItemBO;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
-import dao.Custom.ItemDAO;
-import dao.Custom.Impl.ItemDAOImpl;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -44,9 +41,12 @@ public class ManageItemsFormController {
     public JFXTextField txtUnitPrice;
     public JFXButton btnAddNewItem;
 
-   ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
+    //    ItemBO itemBO = new ItemBOImpl();
+//    ItemBO itemBO = BOFactory.getBoFactory().getItemBO();
+    ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
 
     public void initialize() {
+
         tblItems.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("code"));
         tblItems.getColumns().get(1).setCellValueFactory(new PropertyValueFactory<>("description"));
         tblItems.getColumns().get(2).setCellValueFactory(new PropertyValueFactory<>("qtyOnHand"));
@@ -80,10 +80,7 @@ public class ManageItemsFormController {
         tblItems.getItems().clear();
         try {
             /*Get all items*/
-
-            ItemBOImpl itemBO=new ItemBOImpl();
-            ArrayList<ItemDTO> allItems =itemBO.getAllItems();
-
+            ArrayList<ItemDTO> allItems = itemBO.getAllItems();
             for (ItemDTO i : allItems) {
                 tblItems.getItems().add(new ItemTM(i.getCode(), i.getDescription(), i.getUnitPrice(), i.getQtyOnHand()));
             }
@@ -144,8 +141,6 @@ public class ManageItemsFormController {
             }
 
             //Delete Customer
-
-            ItemBOImpl itemBO=new ItemBOImpl();
             itemBO.deleteItem(code);
 
             tblItems.getItems().remove(tblItems.getSelectionModel().getSelectedItem());
@@ -186,7 +181,6 @@ public class ManageItemsFormController {
                     new Alert(Alert.AlertType.ERROR, code + " already exists").show();
                 }
                 //Save Item
-                ItemBOImpl itemBO=new ItemBOImpl();
                 itemBO.saveItem(new ItemDTO(code, description, unitPrice, qtyOnHand));
 
                 tblItems.getItems().add(new ItemTM(code, description, unitPrice, qtyOnHand));
@@ -203,7 +197,6 @@ public class ManageItemsFormController {
                     new Alert(Alert.AlertType.ERROR, "There is no such item associated with the id " + code).show();
                 }
                 /*Update Item*/
-                ItemBOImpl itemBO=new ItemBOImpl();
                 itemBO.updateItem(new ItemDTO(code, description, unitPrice, qtyOnHand));
 
                 ItemTM selectedItem = tblItems.getSelectionModel().getSelectedItem();
@@ -223,14 +216,12 @@ public class ManageItemsFormController {
 
 
     private boolean existItem(String code) throws SQLException, ClassNotFoundException {
-        ItemBOImpl itemBO=new ItemBOImpl();
         return itemBO.existItem(code);
     }
 
 
     private String generateNewId() {
         try {
-            ItemBOImpl itemBO=new ItemBOImpl();
             return itemBO.generateNewCode();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
